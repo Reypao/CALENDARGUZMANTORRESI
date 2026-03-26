@@ -55,8 +55,8 @@
                     </div>
 
                     <div class="field">
-                        <label for="filterPerson">Filter Calendar</label>
-                        <select id="filterPerson">
+                        <label for="filterPersonForm">Filter Calendar</label>
+                        <select id="filterPersonForm">
                             <option value="">All</option>
                             <option value="Efrey">Efrey</option>
                             <option value="Paola">Paola</option>
@@ -64,6 +64,7 @@
                             <option value="Family">Family</option>
                             <option value="Church">Church</option>
                             <option value="BYU">BYU</option>
+                            <option value="Task">Task</option>
                         </select>
                     </div>
 
@@ -107,7 +108,6 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Event</button>
-                    <button type="button" id="clearStorageBtn" class="btn btn-danger">Clear Saved Events</button>
                 </div>
             </form>
         </section>
@@ -124,12 +124,10 @@
         </section>
 
         <section class="panel calendar-panel">
-
-            <!-- FILTER BAR -->
             <div class="calendar-toolbar">
-                <label for="filterPerson">Filter:</label>
+                <label for="filterPersonToolbar">Filter:</label>
 
-                <select id="filterPerson">
+                <select id="filterPersonToolbar">
                     <option value="">All</option>
                     <option value="Efrey">Efrey</option>
                     <option value="Paola">Paola</option>
@@ -137,12 +135,11 @@
                     <option value="Family">Family</option>
                     <option value="Church">Church</option>
                     <option value="BYU">BYU</option>
+                    <option value="Task">Task</option>
                 </select>
             </div>
 
-            <!-- CALENDAR -->
             <div id="calendar"></div>
-
         </section>
 
         <section class="panel list-panel">
@@ -152,22 +149,8 @@
 
     </main>
 
-    <div id="eventModal" class="modal hidden">
-        <div class="modal-content">
-            <button id="closeModal" class="close-btn" aria-label="Close modal">&times;</button>
-            <h3 id="modalTitle">Event Details</h3>
-            <p><strong>Category:</strong> <span id="modalPerson"></span></p>
-            <p><strong>Start:</strong> <span id="modalStart"></span></p>
-            <p><strong>End:</strong> <span id="modalEnd"></span></p>
-            <p><strong>Location:</strong> <span id="modalLocation"></span></p>
-            <p><strong>Description:</strong></p>
-            <p id="modalDescription"></p>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script type="module" src="js/script.js"></script>
-    <script type="module" src="js/firebase.js"></script>
 </body>
 
 </html>
