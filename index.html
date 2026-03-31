@@ -4,153 +4,165 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Guzman-Torresi Family Productivity System</title>
+    <title data-i18n="mainTitle">Guzman-Torresi Family Productivity System</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-    <header class="site-header">
-        <div class="container header-wrap">
-            <div>
-                <h1>Guzman-Torresi Family Productivity System</h1>
-                <p class="subtitle">
-                    Family calendar, school schedule, church activities, tasks, reminders and study planning.
-                </p>
-            </div>
-            <button id="notifyBtn" class="btn btn-secondary">Enable Notifications</button>
+<header class="site-header">
+    <div class="container header-wrap">
+        <div>
+            <h1 data-i18n="mainTitle">Guzman-Torresi Family Productivity System</h1>
+            <p class="subtitle" data-i18n="subtitle">
+                Family calendar, school schedule, church activities, tasks, reminders and study planning.
+            </p>
         </div>
-    </header>
 
-    <main class="container dashboard">
+        <div class="header-actions">
+            <button id="notifyBtn" class="btn btn-secondary" data-i18n="notifications">
+                Enable Notifications
+            </button>
 
-        <section class="panel form-panel">
-            <h2>Add Event / Task</h2>
+            <button id="langToggle" class="btn btn-secondary lang-btn" aria-label="Change language">
+                <span id="langFlag">🇪🇸</span>
+            </button>
 
-            <form id="eventForm" class="event-form">
-                <div class="form-grid">
-                    <div class="field">
-                        <label for="title">Title</label>
-                        <input type="text" id="title" name="title" placeholder="Event title" required>
-                    </div>
+            <button id="speakBtn" class="btn btn-secondary" aria-label="Read page aloud">
+                🔊
+            </button>
+        </div>
+    </div>
+</header>
 
-                    <div class="field">
-                        <label for="person">Category / Person</label>
-                        <select id="person" name="person" required>
-                            <option value="">Select one</option>
-                            <option value="School">School - Triplets</option>
-                            <option value="Paola">Paola Guzman</option>
-                            <option value="Efrey">Efrey Guzman</option>
-                            <option value="Family">Family</option>
-                            <option value="Church">LDS Church</option>
-                            <option value="BYU">BYU Study</option>
-                            <option value="Task">Task</option>
-                        </select>
-                    </div>
+<main class="container dashboard">
 
-                    <div class="field">
-                        <label for="filterPersonForm">Filter Calendar</label>
-                        <select id="filterPersonForm">
-                            <option value="">All</option>
-                            <option value="Efrey">Efrey</option>
-                            <option value="Paola">Paola</option>
-                            <option value="School">School</option>
-                            <option value="Family">Family</option>
-                            <option value="Church">Church</option>
-                            <option value="BYU">BYU</option>
-                            <option value="Task">Task</option>
-                        </select>
-                    </div>
+    <!-- FORM -->
+    <section class="panel form-panel">
+        <h2 data-i18n="addEvent">Add Event / Task</h2>
 
-                    <div class="field">
-                        <label for="start">Start</label>
-                        <input type="datetime-local" id="start" name="start" required>
-                    </div>
+        <form id="eventForm" class="event-form">
+            <div class="form-grid">
 
-                    <div class="field">
-                        <label for="end">End</label>
-                        <input type="datetime-local" id="end" name="end" required>
-                    </div>
-
-                    <div class="field">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" name="location" placeholder="Optional location">
-                    </div>
-
-                    <div class="field">
-                        <label for="reminder">Reminder</label>
-                        <select id="reminder" name="reminder">
-                            <option value="0">No reminder</option>
-                            <option value="10">10 minutes before</option>
-                            <option value="30">30 minutes before</option>
-                            <option value="60">1 hour before</option>
-                            <option value="1440">1 day before</option>
-                        </select>
-                    </div>
-
-                    <div class="field full-width">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4"
-                            placeholder="Write details here..."></textarea>
-                    </div>
-
-                    <div class="field checkbox-field">
-                        <input type="checkbox" id="allDay" name="allDay">
-                        <label for="allDay">All day event</label>
-                    </div>
+                <div class="field">
+                    <label for="title" data-i18n="title">Title</label>
+                    <input type="text" id="title" name="title"
+                        placeholder="Event title"
+                        data-i18n-placeholder="eventTitle"
+                        required>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save Event</button>
+                <div class="field">
+                    <label for="person" data-i18n="category">Category / Person</label>
+                    <select id="person" name="person" required>
+                        <option value="Select" data-i18n="selectOne">Select one</option>
+                        <option value="School" data-i18n="schoolTriplets">School - Triplets</option>
+                        <option value="Paola" data-i18n="paola">Paola Guzman</option>
+                        <option value="Efrey" data-i18n="efrey">Efrey Guzman</option>
+                        <option value="Family" data-i18n="family">Family</option>
+                        <option value="Church" data-i18n="church">LDS Church</option>
+                        <option value="BYU" data-i18n="byu">BYU Study</option>
+                        <option value="Task" data-i18n="task">Task</option>
+                    </select>
                 </div>
-            </form>
-        </section>
 
-        <section class="panel summary-panel">
-            <h2>Family Quick Schedule</h2>
-            <ul class="summary-list">
-                <li><strong>Triplets:</strong> Altara Elementary School - Kindergarten</li>
-                <li><strong>Aitana, Catalina, Sophie:</strong> same school schedule</li>
-                <li><strong>Sundays:</strong> LDS Church family activities</li>
-                <li><strong>Efrey:</strong> BYU Software Development online</li>
-                <li><strong>Paola:</strong> personal and professional activities</li>
-            </ul>
-        </section>
+                <div class="field">
+                    <label for="start" data-i18n="start">Start</label>
+                    <input type="datetime-local" id="start" name="start" required>
+                </div>
 
-        <section class="panel calendar-panel">
-            <div class="calendar-toolbar">
-                <label for="filterPersonToolbar">Filter:</label>
+                <div class="field">
+                    <label for="end" data-i18n="end">End</label>
+                    <input type="datetime-local" id="end" name="end" required>
+                </div>
 
-                <select id="filterPersonToolbar">
-                    <option value="">All</option>
-                    <option value="Efrey">Efrey</option>
-                    <option value="Paola">Paola</option>
-                    <option value="School">School</option>
-                    <option value="Family">Family</option>
-                    <option value="Church">Church</option>
-                    <option value="BYU">BYU</option>
-                    <option value="Task">Task</option>
-                </select>
+                <div class="field">
+                    <label for="location" data-i18n="location">Location</label>
+                    <input type="text" id="location" name="location"
+                        placeholder="Optional location"
+                        data-i18n-placeholder="locationPlaceholder">
+                </div>
+
+                <div class="field">
+                    <label for="reminder" data-i18n="reminder">Reminder</label>
+                    <select id="reminder" name="reminder">
+                        <option value="0" data-i18n="noReminder">No reminder</option>
+                        <option value="10" data-i18n="min10">10 minutes before</option>
+                        <option value="30" data-i18n="min30">30 minutes before</option>
+                        <option value="60" data-i18n="hour1">1 hour before</option>
+                        <option value="1440" data-i18n="day1">1 day before</option>
+                    </select>
+                </div>
+
+                <div class="field full-width">
+                    <label for="description" data-i18n="description">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                        placeholder="Write details here..."
+                        data-i18n-placeholder="descriptionPlaceholder"></textarea>
+                </div>
+
+                <div class="field checkbox-field">
+                    <input type="checkbox" id="allDay" name="allDay">
+                    <label for="allDay" data-i18n="allDay">All day event</label>
+                </div>
+
             </div>
 
-            <div id="calendar"></div>
-        </section>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" data-i18n="saveBtn">
+                    Save Event
+                </button>
+            </div>
+        </form>
+    </section>
 
-        <section class="panel list-panel">
-            <h2>Upcoming Events</h2>
-            <div id="eventList" class="event-list"></div>
-        </section>
+    <!-- SUMMARY -->
+    <section class="panel summary-panel">
+        <h2 data-i18n="quickSchedule">Family Quick Schedule</h2>
+        <ul class="summary-list">
+            <li data-i18n="tripletsSchool"><strong>Triplets:</strong> Altara Elementary School - Kindergarten</li>
+            <li data-i18n="tripletsSame"><strong>Aitana, Catalina, Sophie:</strong> same school schedule</li>
+            <li data-i18n="sunday"><strong>Sundays:</strong> LDS Church family activities</li>
+            <li data-i18n="efreyStudy"><strong>Efrey:</strong> BYU Software Development online</li>
+            <li data-i18n="paolaActivities"><strong>Paola:</strong> personal and professional activities</li>
+        </ul>
+    </section>
 
-    </main>
+    <!-- CALENDAR -->
+    <section class="panel calendar-panel">
+        <div class="calendar-toolbar">
+            <label for="filterPersonToolbar" data-i18n="filter">Filter:</label>
 
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <script type="module" src="js/script.js"></script>
+            <select id="filterPersonToolbar">
+                <option value="" data-i18n="all">All</option>
+                <option value="Efrey" data-i18n="effrey">Effrey</option>
+                <option value="Paola" data-i18n="paola">Paola</option>
+                <option value="School" data-i18n="school">School</option>
+                <option value="Family" data-i18n="family">Family</option>
+                <option value="Church" data-i18n="church">Church</option>
+                <option value="BYU" data-i18n="byu">BYU</option>
+                <option value="Task" data-i18n="task">Task</option>
+            </select>
+        </div>
+
+        <div id="calendar"></div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="panel list-panel">
+        <h2 data-i18n="upcoming">Upcoming Events</h2>
+        <div id="eventList" class="event-list"></div>
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script type="module" src="js/script.js"></script>
+
 </body>
-
 </html>

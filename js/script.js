@@ -1,13 +1,15 @@
 import { db, collection, addDoc, getDocs } from "./firebase.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+
   const calendarEl = document.getElementById("calendar");
   const form = document.getElementById("eventForm");
   const notifyBtn = document.getElementById("notifyBtn");
   const eventList = document.getElementById("eventList");
 
-  const filterForm = document.getElementById("filterPersonForm");
   const filterToolbar = document.getElementById("filterPersonToolbar");
+
+  let editingEventId = null;
 
   const colors = {
     School: "#43a047",
@@ -19,10 +21,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     Task: "#6d4c41"
   };
 
+  // ============================
+  // CALENDAR
+  // ============================
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: window.innerWidth < 700 ? "listWeek" : "dayGridMonth",
     editable: false,
-    selectable: false,
+    selectable: true,
     height: "auto",
 
     headerToolbar: {
@@ -31,11 +36,49 @@ document.addEventListener("DOMContentLoaded", async () => {
       right: "dayGridMonth,timeGridWeek,listWeek"
     },
 
-    events: []
+    events: [],
+
+    // 👉 CLICK DAY (CREATE)
+    dateClick(info) {
+      editingEventId = null;
+
+      form.title.value = "";
+      form.start.value = info.dateStr + "T09:00";
+      form.end.value = info.dateStr + "T10:00";
+      form.person.value = "";
+      form.location.value = "";
+      form.description.value = "";
+
+      document.querySelector(".btn-primary").textContent = "Save Event";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+
+    // 👉 CLICK EVENT (EDIT)
+    eventClick(info) {
+      const event = info.event;
+      editingEventId = event.id;
+
+      form.title.value = event.title;
+      form.start.value = formatForInput(event.start);
+      form.end.value = formatForInput(event.end);
+      form.person.value = event.extendedProps.person;
+      form.location.value = event.extendedProps.location || "";
+      form.description.value = event.extendedProps.description || "";
+      form.reminder.value = event.extendedProps.reminder || "0";
+      form.allDay.checked = event.extendedProps.allDay || false;
+
+      document.querySelector(".btn-primary").textContent = "Update Event";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   });
 
   calendar.render();
 
+  // ============================
+  // LOAD EVENTS (FIREBASE)
+  // ============================
   async function loadEventsFromFirestore() {
     calendar.removeAllEvents();
     eventList.innerHTML = "";
@@ -62,9 +105,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     renderEventList();
-    applyCurrentFilter();
+    applyFilter();
+
+    // fallback si no hay eventos
+    if (calendar.getEvents().length === 0) {
+      calendar.addEvent({
+        title: "No events yet",
+        start: new Date()
+      });
+    }
   }
 
+  // ============================
+  // RENDER LIST
+  // ============================
   function renderEventList() {
     const events = calendar.getEvents().sort((a, b) => {
       return new Date(a.start) - new Date(b.start);
@@ -75,22 +129,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    eventList.innerHTML = events.map(event => {
-      return `
-        <div class="event-card">
-          <h3>${event.title}</h3>
-          <p><strong>Category:</strong> ${event.extendedProps.person || "-"}</p>
-          <p><strong>Start:</strong> ${formatDate(event.start)}</p>
-          <p><strong>End:</strong> ${formatDate(event.end)}</p>
-        </div>
-      `;
-    }).join("");
+    eventList.innerHTML = events.map(event => `
+      <div class="event-card">
+        <h3>${event.title}</h3>
+        <p><strong>Category:</strong> ${event.extendedProps.person || "-"}</p>
+        <p><strong>Start:</strong> ${formatDate(event.start)}</p>
+        <p><strong>End:</strong> ${formatDate(event.end)}</p>
+      </div>
+    `).join("");
   }
 
+  // ============================
+  // SAVE / UPDATE EVENT
+  // ============================
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const newEvent = {
+    const eventData = {
       title: form.title.value,
       person: form.person.value,
       start: form.start.value,
@@ -101,15 +156,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       allDay: form.allDay.checked
     };
 
-    await addDoc(collection(db, "events"), newEvent);
+    // 👉 UPDATE
+    if (editingEventId) {
+      const event = calendar.getEventById(editingEventId);
+
+      event.setProp("title", eventData.title);
+      event.setStart(eventData.start);
+      event.setEnd(eventData.end);
+      event.setExtendedProp("person", eventData.person);
+      event.setExtendedProp("location", eventData.location);
+      event.setExtendedProp("description", eventData.description);
+      event.setExtendedProp("reminder", eventData.reminder);
+
+      editingEventId = null;
+
+    } else {
+      // 👉 CREATE
+      await addDoc(collection(db, "events"), eventData);
+    }
 
     form.reset();
-    await loadEventsFromFirestore();
-    alert("Evento guardado en Firestore");
+    document.querySelector(".btn-primary").textContent = "Save Event";
+
+    loadEventsFromFirestore().catch(err => {
+      console.error("Firestore error:", err);
+    });
   });
 
-  function applyCurrentFilter() {
-    const value = filterToolbar.value || filterForm.value || "";
+  // ============================
+  // FILTER
+  // ============================
+  function applyFilter() {
+    const value = filterToolbar.value;
 
     calendar.getEvents().forEach(event => {
       if (!value || event.extendedProps.person === value) {
@@ -120,16 +198,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  filterToolbar.addEventListener("change", () => {
-    filterForm.value = filterToolbar.value;
-    applyCurrentFilter();
-  });
+  filterToolbar.addEventListener("change", applyFilter);
 
-  filterForm.addEventListener("change", () => {
-    filterToolbar.value = filterForm.value;
-    applyCurrentFilter();
-  });
-
+  // ============================
+  // NOTIFICATIONS
+  // ============================
   notifyBtn.addEventListener("click", async () => {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
@@ -137,10 +210,95 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // ============================
+  // HELPERS
+  // ============================
   function formatDate(date) {
     if (!date) return "-";
     return new Date(date).toLocaleString();
   }
 
-  await loadEventsFromFirestore();
+  function formatForInput(date) {
+    if (!date) return "";
+    return new Date(date).toISOString().slice(0,16);
+  }
+
+  // ============================
+  // INIT
+  // ============================
+  loadEventsFromFirestore().catch(err => {
+    console.error("Firestore error:", err);
+  });
+
 });
+
+  // ============================
+// 🌎 LANGUAGE SYSTEM traduccion
+// ============================
+
+const langToggle = document.getElementById("langToggle");
+
+let currentLang = localStorage.getItem("lang") || "en";
+
+const translations = {
+  en: {
+    addEvent: "Add Event / Task",
+    title: "Title",
+    category: "Category / Person",
+    start: "Start",
+    end: "End",
+    location: "Location",
+    reminder: "Reminder",
+    description: "Description",
+    saveBtn: "Save Event",
+    updateBtn: "Update Event",
+    notifications: "Enable Notifications",
+    subtitle: "Family calendar, school schedule, church activities, tasks, reminders and study planning.",
+    upcoming: "Upcoming Events"
+  },
+  es: {
+    addEvent: "Agregar Evento / Tarea",
+    title: "Título",
+    category: "Categoría / Persona",
+    start: "Inicio",
+    end: "Fin",
+    location: "Ubicación",
+    reminder: "Recordatorio",
+    description: "Descripción",
+    saveBtn: "Guardar Evento",
+    updateBtn: "Actualizar Evento",
+    notifications: "Activar Notificaciones",
+    subtitle: "Calendario familiar, escuela, iglesia, tareas y planificación.",
+    upcoming: "Próximos Eventos"
+  }
+};
+
+// 👉 APPLY LANGUAGE
+function applyLanguage(lang) {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    if (translations[lang][key]) {
+      el.textContent = translations[lang][key];
+    }
+  });
+
+  // botón save/update dinámico
+  const btn = document.querySelector(".btn-primary");
+  if (btn.textContent.includes("Update") || btn.textContent.includes("Actualizar")) {
+    btn.textContent = translations[lang].updateBtn;
+  } else {
+    btn.textContent = translations[lang].saveBtn;
+  }
+
+  langToggle.textContent = lang === "en" ? "ES" : "EN";
+  localStorage.setItem("lang", lang);
+}
+
+// 👉 TOGGLE
+langToggle.addEventListener("click", () => {
+  currentLang = currentLang === "en" ? "es" : "en";
+  applyLanguage(currentLang);
+});
+
+// 👉 INIT
+applyLanguage(currentLang);

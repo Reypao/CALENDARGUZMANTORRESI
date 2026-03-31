@@ -69,9 +69,9 @@ body {
 }
 
 .dashboard {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 9rem;
+  display: grid;  
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
   padding: 1.5rem 0 2rem;
 }
 
@@ -92,6 +92,8 @@ body {
 .calendar-panel {
   grid-column: 2 / 3;
   grid-row: 1 / 4;
+  width: 100%;
+  border: 3px solid rgba(38, 191, 150, 0.314);
 }
 
 .panel h2 {
@@ -187,6 +189,11 @@ textarea:focus {
 .btn-danger {
   background: var(--danger);
   color: white;
+}
+
+button {
+  min-height: 48px;
+  touch-action: manipulation;
 }
 
 .summary-list {
@@ -316,7 +323,6 @@ textarea:focus {
 
 /*last add*/
 
-
 .calendar-toolbar label {
   font-weight: bold;
   color: var(--primary);
@@ -359,8 +365,26 @@ textarea:focus {
   }
 }
 
-@media (max-width: 600px) {
-  .calendar-toolbar {
-    justify-content: center;
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .header-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn {
+    width: 100%;
   }
 }
