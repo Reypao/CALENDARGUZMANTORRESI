@@ -1,5 +1,12 @@
 import { db, collection, addDoc, getDocs } from "./firebase.js";
 
+// 🔐 PROTECCIÓN SIMPLE
+const user = localStorage.getItem("user");
+
+if (!user) {
+  window.location.href = "login.html";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const calendarEl = document.getElementById("calendar");
@@ -25,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // CALENDAR
   // ============================
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: window.innerWidth < 700 ? "listWeek" : "dayGridMonth",
+    initialView: window.innerWidth < 700 ? "timeGridDay" : "dayGridMonth",
     editable: false,
     selectable: true,
     height: "auto",
@@ -73,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
-
+  
   calendar.render();
 
   // ============================
@@ -242,6 +249,7 @@ let currentLang = localStorage.getItem("lang") || "en";
 
 const translations = {
   en: {
+    mainTitle:"Guzman-Torresi Family Productivity System",
     addEvent: "Add Event / Task",
     title: "Title",
     category: "Category / Person",
@@ -257,6 +265,7 @@ const translations = {
     upcoming: "Upcoming Events"
   },
   es: {
+    mainTitle:"Guzman-Torresi Sistema de Productividad Familiar",
     addEvent: "Agregar Evento / Tarea",
     title: "Título",
     category: "Categoría / Persona",
@@ -302,3 +311,5 @@ langToggle.addEventListener("click", () => {
 
 // 👉 INIT
 applyLanguage(currentLang);
+
+ 

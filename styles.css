@@ -207,6 +207,7 @@ button {
 
 #calendar {
   max-width: 100%;
+  min-height: 600px;
 }
 
 .fc .fc-toolbar-title {
@@ -218,6 +219,9 @@ button {
   background: var(--primary);
   border-color: var(--primary);
   text-transform: capitalize;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
 }
 
 .fc .fc-button:hover,
@@ -232,6 +236,22 @@ button {
   border-radius: 8px !important;
   font-weight: 700;
 }
+
+
+
+.fc-header-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fc-toolbar-chunk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
 
 .event-list {
   display: grid;
@@ -315,7 +335,8 @@ button {
   .summary-panel,
   .list-panel,
   .calendar-panel {
-    grid-column: auto;
+    grid-column: 1 / -1;
+    /* ocupa todo el ancho */
     grid-row: auto;
   }
 

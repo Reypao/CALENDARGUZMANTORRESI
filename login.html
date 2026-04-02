@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Family Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Jura", sans-serif;
+            background: linear-gradient(135deg, #0c3d72, #20720c);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0c3d72;
+        }
+
+        .field {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #20720c;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h2>Family Access</h2>
+
+        <form id="loginForm">
+
+            <div class="field">
+                <input type="text" id="username" placeholder="Name" required>
+            </div>
+
+            <div class="field">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <button class="btn" type="submit">Enter</button>
+
+        </form>
+
+        <div class="error" id="errorMsg"></div>
+    </div>
+
+    <script src="js/login.js"></script>
+
+</body>
+
+</html>
