@@ -341,7 +341,7 @@ button {
   }
 
   .btn {
-    width: 20%;
+    width: max-content;
   }
 
   .header-actions {
@@ -356,7 +356,7 @@ button {
   }
 
   .calendar-panel {
-    width: 60%;
+    width: 100%;
   }
 
   #notifyBtn {

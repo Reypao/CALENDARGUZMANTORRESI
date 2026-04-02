@@ -25,8 +25,3 @@ form.addEventListener("submit", (e) => {
         errorMsg.textContent = "Access denied";
     }
 });
-
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
-});

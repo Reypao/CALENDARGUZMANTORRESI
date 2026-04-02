@@ -40,7 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
     headerToolbar: {
       left: "prev,next today",
       center: "title",
-      right: "dayGridMonth,timeGridWeek,listWeek"
+      right: "dayGridMonth,timeGridWeek,listWeek,listDay"
+    },
+
+    views:{
+      dayGridMonth:{buttonText:"Month"},
+      timeGridWeek:{buttonText:"Week"},
+      listWeek:{buttonText:"List"},
+      listDay:{buttonText:"Day"},
     },
 
     events: [],
@@ -80,8 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
-  
+
   calendar.render();
+
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  });
 
   // ============================
   // LOAD EVENTS (FIREBASE)
@@ -227,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatForInput(date) {
     if (!date) return "";
-    return new Date(date).toISOString().slice(0,16);
+    return new Date(date).toISOString().slice(0, 16);
   }
 
   // ============================
@@ -239,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-  // ============================
+// ============================
 // 🌎 LANGUAGE SYSTEM traduccion
 // ============================
 
@@ -249,7 +263,7 @@ let currentLang = localStorage.getItem("lang") || "en";
 
 const translations = {
   en: {
-    mainTitle:"Guzman-Torresi Family Productivity System",
+    mainTitle: "Guzman-Torresi Family Productivity System",
     addEvent: "Add Event / Task",
     title: "Title",
     category: "Category / Person",
@@ -265,7 +279,7 @@ const translations = {
     upcoming: "Upcoming Events"
   },
   es: {
-    mainTitle:"Guzman-Torresi Sistema de Productividad Familiar",
+    mainTitle: "Guzman-Torresi Sistema de Productividad Familiar",
     addEvent: "Agregar Evento / Tarea",
     title: "Título",
     category: "Categoría / Persona",
@@ -312,4 +326,3 @@ langToggle.addEventListener("click", () => {
 // 👉 INIT
 applyLanguage(currentLang);
 
- 
