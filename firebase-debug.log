@@ -1,0 +1,32 @@
+[debug] [2026-04-03T05:45:08.065Z] ----------------------------------------------------------------------
+[debug] [2026-04-03T05:45:08.068Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\efrey\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init functions
+[debug] [2026-04-03T05:45:08.068Z] CLI Version:   15.13.0
+[debug] [2026-04-03T05:45:08.068Z] Platform:      win32
+[debug] [2026-04-03T05:45:08.068Z] Node Version:  v24.14.1
+[debug] [2026-04-03T05:45:08.068Z] Time:          Thu Apr 02 2026 23:45:08 GMT-0600 (Mountain Daylight Time)
+[debug] [2026-04-03T05:45:08.068Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Projects\calendarGuzmanTorresi
+
+Before we get started, keep in mind:
+
+  * You are currently outside your home directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[info] i  If you want to create a project in a Google Cloud organization or folder, please use "firebase projects:create" instead, and return to this command when you've created the project. 
+[debug] [2026-04-03T05:46:42.111Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-03T05:46:42.111Z] > authorizing via signed-in user (efrey5guzman@gmail.com)
