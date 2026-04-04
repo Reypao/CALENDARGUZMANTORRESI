@@ -13,23 +13,27 @@
 
     <style>
         body {
-            margin: 0;
-            font-family: "Jura", sans-serif;
-            height: 100vh;
+  margin: 0;
+  font-family: "Jura", sans-serif;
+  min-height: 100dvh;
 
-            /* 🔥 Fondo con imagen + overlay */
-            background:
-                linear-gradient(rgba(44, 43, 43, 0.5), rgba(113, 112, 112, 0.15)),
-                url("images/trillis.jpg");
+  background:
+    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
+    url("images/trillis.jpg");
 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+  background-size: cover;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+  /* 🔥 KEY CHANGE */
+  background-position: center top; /* show faces */
+
+  display: flex;
+  justify-content: center;
+
+  /* 🔥 THIS CONTROLS VERTICAL POSITION */
+  align-items: flex-end;
+
+  padding-bottom: 12vh; /* pushes it up from bottom */
+}
 
         .login-container {
             background: rgba(255, 255, 255, 0.2);
