@@ -348,3 +348,111 @@ langToggle.addEventListener("click", () => {
 // 👉 INIT
 applyLanguage(currentLang);
 
+
+// ============================
+// EMAIL REMINDERS
+// ============================
+function scheduleAllReminders() {
+  const events = calendar.getEvents();
+  events.forEach((event) => {
+    scheduleReminderForEvent(event);
+  });
+}
+
+function scheduleReminderForEvent(event) {
+  const reminderMinutes = Number(event.extendedProps.reminder || 0);
+
+  if (!reminderMinutes || reminderMinutes <= 0) return;
+  if (event.extendedProps.reminderSentAt) return;
+
+  const reminderDate = getReminderDate(event);
+  if (!reminderDate) return;
+
+  const now = Date.now();
+  const eventStart = new Date(event.start).getTime();
+
+  // si ya pasó el momento del recordatorio pero el evento todavía no empezó,
+  // se manda al abrir la app
+  if (now >= reminderDate.getTime() && now < eventStart) {
+    sendReminderEmail(event);
+    return;
+  }
+
+  const delay = reminderDate.getTime() - now;
+
+  if (delay > 0) {
+    const timeoutId = setTimeout(() => {
+      sendReminderEmail(event);
+    }, delay);
+
+    reminderTimeouts.set(event.id, timeoutId);
+  }
+}
+
+async function sendReminderEmail(event) {
+  if (!window.emailjs) {
+    console.error("EmailJS not loaded.");
+    return;
+  }
+
+  if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+    console.error("EmailJS config incomplete.");
+    return;
+  }
+
+  if (event.extendedProps.reminderSentAt) return;
+
+  try {
+    const templateParams = {
+      to_email: REMINDER_RECIPIENTS.join(", "),
+      event_title: event.title || "",
+      category: event.extendedProps.person || "",
+      start_date: formatDate(event.start),
+      end_date: formatDate(event.end),
+      location: event.extendedProps.location || "No location",
+      description: event.extendedProps.description || "No description",
+      reminder_minutes: event.extendedProps.reminder || "0",
+      app_name: "Family Productivity System"
+    };
+
+    await window.emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
+
+    const sentAt = new Date().toISOString();
+
+    await updateDoc(doc(db, "events", event.id), {
+      reminderSentAt: sentAt
+    });
+
+    event.setExtendedProp("reminderSentAt", sentAt);
+
+    if (Notification.permission === "granted") {
+      new Notification("Reminder sent by email", {
+        body: event.title
+      });
+    }
+
+    console.log("Reminder email sent:", event.title);
+  } catch (error) {
+    console.error("Email reminder error:", error);
+  }
+}
+
+function clearAllReminderTimeouts() {
+  reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+  reminderTimeouts.clear();
+}
+
+function getReminderDate(event) {
+  if (!event.start) return null;
+
+  const reminderMinutes = Number(event.extendedProps.reminder || 0);
+  if (!reminderMinutes || reminderMinutes <= 0) return null;
+
+  const eventStart = new Date(event.start).getTime();
+  return new Date(eventStart - reminderMinutes * 60 * 1000);
+}
+
