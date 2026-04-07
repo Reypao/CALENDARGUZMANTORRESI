@@ -10,7 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="styles.css">
+
 </head>
 
 <body>
@@ -91,6 +93,7 @@
                     <label for="reminder" data-i18n="reminder">Reminder</label>
                     <select id="reminder" name="reminder">
                         <option value="0" data-i18n="noReminder">No reminder</option>
+                        <option value="1" data-i18n="min1">1 minutes before(test)</option>
                         <option value="10" data-i18n="min10">10 minutes before</option>
                         <option value="30" data-i18n="min30">30 minutes before</option>
                         <option value="60" data-i18n="hour1">1 hour before</option>
@@ -162,6 +165,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script type="module" src="js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 </body>
 </html>

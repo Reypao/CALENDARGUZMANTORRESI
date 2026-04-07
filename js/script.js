@@ -1,4 +1,6 @@
-import { db, collection, addDoc, getDocs } from "./firebase.js";
+import { db, collection, addDoc, getDocs, updateDoc, doc } from "./firebase.js";
+import { EMAILJS_CONFIG, REMINDER_RECIPIENTS } from "./emailjs-config.js";
+
 
 // 🔐 PROTECCIÓN SIMPLE
 const user = localStorage.getItem("user");
@@ -7,12 +9,23 @@ if (!user) {
   window.location.href = "login.html";
 }
 
+// 🔐 EMAIL JS CONFIG
+const reminderTimeOuts = new Map();
+
+if (window.emailjs) {
+  window.JSON.init({
+    publicKey: EMAILJS_CONFIG.PUBLIC_KEY
+  })
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const calendarEl = document.getElementById("calendar");
   const form = document.getElementById("eventForm");
   const notifyBtn = document.getElementById("notifyBtn");
   const eventList = document.getElementById("eventList");
+  const logOutbtn = document.getElementById("logoutBtn");
 
   const filterToolbar = document.getElementById("filterPersonToolbar");
 
@@ -43,11 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
       right: "dayGridMonth,timeGridWeek,listWeek,listDay"
     },
 
-    views:{
-      dayGridMonth:{buttonText:"Month"},
-      timeGridWeek:{buttonText:"Week"},
-      listWeek:{buttonText:"List"},
-      listDay:{buttonText:"Day"},
+    views: {
+      dayGridMonth: { buttonText: "Month" },
+      timeGridWeek: { buttonText: "Week" },
+      listWeek: { buttonText: "List" },
+      listDay: { buttonText: "Day" },
     },
 
     events: [],
@@ -90,9 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   calendar.render();
 
-  const logoutBtn = document.getElementById("logoutBtn");
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
+  logOutbtn.addEventListener("click", () => {
     localStorage.removeItem("user");
     window.location.href = "login.html";
   });
@@ -101,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // LOAD EVENTS (FIREBASE)
   // ============================
   async function loadEventsFromFirestore() {
+    clearAllReminderTimeouts();
     calendar.removeAllEvents();
     eventList.innerHTML = "";
 
@@ -114,19 +127,23 @@ document.addEventListener("DOMContentLoaded", () => {
         title: event.title,
         start: event.start,
         end: event.end,
+        allDay: event.allDay || false,
         backgroundColor: colors[event.person] || "#3788d8",
+        borderColor: colors[event.person] || "#3788d8",
         extendedProps: {
           person: event.person,
-          reminder: event.reminder || "0",
+          reminder: String(event.reminder || "0"),
           location: event.location || "",
           description: event.description || "",
-          allDay: event.allDay || false
+          allDay: event.allDay || false,
+          reminderSentAt: event.reminderSentAt || null,
         }
       });
     });
 
     renderEventList();
     applyFilter();
+    scheduleAllReminders();
 
     // fallback si no hay eventos
     if (calendar.getEvents().length === 0) {
@@ -174,7 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
       location: form.location.value,
       reminder: form.reminder.value,
       description: form.description.value,
-      allDay: form.allDay.checked
+      allDay: form.allDay.checked,
+      reminderSentAll: null,
+
     };
 
     // 👉 UPDATE
@@ -188,9 +207,12 @@ document.addEventListener("DOMContentLoaded", () => {
       event.setExtendedProp("location", eventData.location);
       event.setExtendedProp("description", eventData.description);
       event.setExtendedProp("reminder", eventData.reminder);
-
-      editingEventId = null;
-
+      if (editingEventId) {
+        await updateDoc(doc(db, "events", editingEventId), eventData);
+        editingEventId = null;
+      } else {
+        await addDoc(collection(db, "events"), eventData);
+      }
     } else {
       // 👉 CREATE
       await addDoc(collection(db, "events"), eventData);
