@@ -13,7 +13,7 @@ if (!user) {
 const reminderTimeOuts = new Map();
 
 if (window.emailjs) {
-  window.JSON.init({
+  window.emailjs.init({
     publicKey: EMAILJS_CONFIG.PUBLIC_KEY
   })
 }
@@ -72,9 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
       form.title.value = "";
       form.start.value = info.dateStr + "T09:00";
       form.end.value = info.dateStr + "T10:00";
-      form.person.value = "";
+      form.person.value = "Select";
       form.location.value = "";
       form.description.value = "";
+      form.reminder.value = "0";
+      form.allDay.checked = false;
 
       document.querySelector(".btn-primary").textContent = "Save Event";
 
@@ -183,6 +185,11 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (form.person.value === "Select") {
+      alert("Please select a person.");
+      return;
+    }
+
     const eventData = {
       title: form.title.value,
       person: form.person.value,
@@ -192,29 +199,15 @@ document.addEventListener("DOMContentLoaded", () => {
       reminder: form.reminder.value,
       description: form.description.value,
       allDay: form.allDay.checked,
-      reminderSentAll: null,
+      reminderSentAt: null,
 
     };
 
     // 👉 UPDATE
     if (editingEventId) {
-      const event = calendar.getEventById(editingEventId);
-
-      event.setProp("title", eventData.title);
-      event.setStart(eventData.start);
-      event.setEnd(eventData.end);
-      event.setExtendedProp("person", eventData.person);
-      event.setExtendedProp("location", eventData.location);
-      event.setExtendedProp("description", eventData.description);
-      event.setExtendedProp("reminder", eventData.reminder);
-      if (editingEventId) {
-        await updateDoc(doc(db, "events", editingEventId), eventData);
-        editingEventId = null;
-      } else {
-        await addDoc(collection(db, "events"), eventData);
-      }
+      await updateDoc(doc(db, "events", editingEventId), eventData);
+      editingEventId = null;
     } else {
-      // 👉 CREATE
       await addDoc(collection(db, "events"), eventData);
     }
 
@@ -254,6 +247,113 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ============================
+  // EMAIL REMINDERS
+  // ============================
+  function scheduleAllReminders() {
+    const events = calendar.getEvents();
+    events.forEach((event) => {
+      scheduleReminderForEvent(event);
+    });
+  }
+
+  function scheduleReminderForEvent(event) {
+    const reminderMinutes = Number(event.extendedProps.reminder || 0);
+
+    if (!reminderMinutes || reminderMinutes <= 0) return;
+    if (event.extendedProps.reminderSentAt) return;
+
+    const reminderDate = getReminderDate(event);
+    if (!reminderDate) return;
+
+    const now = Date.now();
+    const eventStart = new Date(event.start).getTime();
+
+    // si ya pasó el momento del recordatorio pero el evento todavía no empezó,
+    // se manda al abrir la app
+    if (now >= reminderDate.getTime() && now < eventStart) {
+      sendReminderEmail(event);
+      return;
+    }
+
+    const delay = reminderDate.getTime() - now;
+
+    if (delay > 0) {
+      const timeoutId = setTimeout(() => {
+        sendReminderEmail(event);
+      }, delay);
+
+      reminderTimeouts.set(event.id, timeoutId);
+    }
+  }
+
+  async function sendReminderEmail(event) {
+    if (!window.emailjs) {
+      console.error("EmailJS not loaded.");
+      return;
+    }
+
+    if (!EMAILJS_CONFIG.PUBLIC_KEY || !EMAILJS_CONFIG.SERVICE_ID || !EMAILJS_CONFIG.TEMPLATE_ID) {
+      console.error("EmailJS config incomplete.");
+      return;
+    }
+
+    if (event.extendedProps.reminderSentAt) return;
+
+    try {
+      const templateParams = {
+        to_email: REMINDER_RECIPIENTS.join(", "),
+        event_title: event.title || "",
+        category: event.extendedProps.person || "",
+        start_date: formatDate(event.start),
+        end_date: formatDate(event.end),
+        location: event.extendedProps.location || "No location",
+        description: event.extendedProps.description || "No description",
+        reminder_minutes: event.extendedProps.reminder || "0",
+        app_name: "Family Productivity System"
+      };
+
+      await window.emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        templateParams
+      );
+
+      const sentAt = new Date().toISOString();
+
+      await updateDoc(doc(db, "events", event.id), {
+        reminderSentAt: sentAt
+      });
+
+      event.setExtendedProp("reminderSentAt", sentAt);
+
+      if (Notification.permission === "granted") {
+        new Notification("Reminder sent by email", {
+          body: event.title
+        });
+      }
+
+      console.log("Reminder email sent:", event.title);
+    } catch (error) {
+      console.error("Email reminder error:", error);
+    }
+  }
+
+  function clearAllReminderTimeouts() {
+    reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+    reminderTimeouts.clear();
+  }
+
+  function getReminderDate(event) {
+    if (!event.start) return null;
+
+    const reminderMinutes = Number(event.extendedProps.reminder || 0);
+    if (!reminderMinutes || reminderMinutes <= 0) return null;
+
+    const eventStart = new Date(event.start).getTime();
+    return new Date(eventStart - reminderMinutes * 60 * 1000);
+  }
+
+  // ============================
   // HELPERS
   // ============================
   function formatDate(date) {
@@ -263,7 +363,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatForInput(date) {
     if (!date) return "";
-    return new Date(date).toISOString().slice(0, 16);
+
+    const local = new Date(date);
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const year = local.getFullYear();
+    const month = pad(local.getMonth() + 1);
+    const day = pad(local.getDate());
+    const hours = pad(local.getHours());
+    const minutes = pad(local.getMinutes());
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
   // ============================
@@ -298,7 +408,8 @@ const translations = {
     updateBtn: "Update Event",
     notifications: "Enable Notifications",
     subtitle: "Family calendar, school schedule, church activities, tasks, reminders and study planning.",
-    upcoming: "Upcoming Events"
+    upcoming: "Upcoming Events",
+    min1: "1 minute before(test)"
   },
   es: {
     mainTitle: "Guzman-Torresi Sistema de Productividad Familiar",
@@ -314,7 +425,8 @@ const translations = {
     updateBtn: "Actualizar Evento",
     notifications: "Activar Notificaciones",
     subtitle: "Calendario familiar, escuela, iglesia, tareas y planificación.",
-    upcoming: "Próximos Eventos"
+    upcoming: "Próximos Eventos",
+    min1: "1 minuto antes(prueba)"
   }
 };
 
@@ -349,110 +461,5 @@ langToggle.addEventListener("click", () => {
 applyLanguage(currentLang);
 
 
-// ============================
-// EMAIL REMINDERS
-// ============================
-function scheduleAllReminders() {
-  const events = calendar.getEvents();
-  events.forEach((event) => {
-    scheduleReminderForEvent(event);
-  });
-}
 
-function scheduleReminderForEvent(event) {
-  const reminderMinutes = Number(event.extendedProps.reminder || 0);
-
-  if (!reminderMinutes || reminderMinutes <= 0) return;
-  if (event.extendedProps.reminderSentAt) return;
-
-  const reminderDate = getReminderDate(event);
-  if (!reminderDate) return;
-
-  const now = Date.now();
-  const eventStart = new Date(event.start).getTime();
-
-  // si ya pasó el momento del recordatorio pero el evento todavía no empezó,
-  // se manda al abrir la app
-  if (now >= reminderDate.getTime() && now < eventStart) {
-    sendReminderEmail(event);
-    return;
-  }
-
-  const delay = reminderDate.getTime() - now;
-
-  if (delay > 0) {
-    const timeoutId = setTimeout(() => {
-      sendReminderEmail(event);
-    }, delay);
-
-    reminderTimeouts.set(event.id, timeoutId);
-  }
-}
-
-async function sendReminderEmail(event) {
-  if (!window.emailjs) {
-    console.error("EmailJS not loaded.");
-    return;
-  }
-
-  if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
-    console.error("EmailJS config incomplete.");
-    return;
-  }
-
-  if (event.extendedProps.reminderSentAt) return;
-
-  try {
-    const templateParams = {
-      to_email: REMINDER_RECIPIENTS.join(", "),
-      event_title: event.title || "",
-      category: event.extendedProps.person || "",
-      start_date: formatDate(event.start),
-      end_date: formatDate(event.end),
-      location: event.extendedProps.location || "No location",
-      description: event.extendedProps.description || "No description",
-      reminder_minutes: event.extendedProps.reminder || "0",
-      app_name: "Family Productivity System"
-    };
-
-    await window.emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams
-    );
-
-    const sentAt = new Date().toISOString();
-
-    await updateDoc(doc(db, "events", event.id), {
-      reminderSentAt: sentAt
-    });
-
-    event.setExtendedProp("reminderSentAt", sentAt);
-
-    if (Notification.permission === "granted") {
-      new Notification("Reminder sent by email", {
-        body: event.title
-      });
-    }
-
-    console.log("Reminder email sent:", event.title);
-  } catch (error) {
-    console.error("Email reminder error:", error);
-  }
-}
-
-function clearAllReminderTimeouts() {
-  reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
-  reminderTimeouts.clear();
-}
-
-function getReminderDate(event) {
-  if (!event.start) return null;
-
-  const reminderMinutes = Number(event.extendedProps.reminder || 0);
-  if (!reminderMinutes || reminderMinutes <= 0) return null;
-
-  const eventStart = new Date(event.start).getTime();
-  return new Date(eventStart - reminderMinutes * 60 * 1000);
-}
 
