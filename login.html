@@ -1,125 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 
-    <title>Family Login</title>
+        <title>Family Login</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: "Jura", sans-serif;
-            min-height: 100vh;
+        <style>
+            * {
+                box-sizing: border-box;
+            }
 
-            background:
-                linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)),
-                url("images/trillis.jpg");
+            body {
+                margin: 0;
+                font-family: "Jura", sans-serif;
+                min-height: 100vh;
+                background: #f3f3f3;
+            }
 
-            
+            .login-page {
+                position: relative;
+                min-height: 100vh;
+                width: 100%;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: flex-end;
+                padding: 0 1rem 4vh;
+            }
 
-            background-size: 128%;
+            .bg-kids {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center 35%;
+                z-index: 0;
+            }
 
-            /* 🔥 KEY CHANGE */
-            background-position: center;
-            /* show faces */
+            .login-page::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.15);
+                z-index: 1;
+            }
 
-            display: flex;
-            justify-content: center;
+            .family-access-container {
+                position: relative;
+                z-index: 2;
+                width: 100%;
+                max-width: 400px;
+                padding: 2.5rem 1.5rem;
+                border-radius: 24px;
+                background: rgba(255, 255, 255, 0.16);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            }
 
-            /* 🔥 THIS CONTROLS VERTICAL POSITION */
-            align-items: flex-end;
+            .family-access-container:hover {
+                transform: translateY(-3px);
+                transition: 0.3s ease;
+            }
 
-            padding-bottom: 10vh;
-            /* pushes it up from bottom */
-        }
+            .family-access-container h1 {
+                text-align: center;
+                color: #0c3d72;
+                margin: 0 0 1.5rem;
+                font-size: 2rem;
+            }
 
-        .login-container {
-            background: rgba(255, 255, 255, 0.2);
-            /* transparencia suave */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            .family-access-container input {
+                width: 100%;
+                padding: 12px 14px;
+                margin-bottom: 1rem;
+                border-radius: 10px;
+                border: 1px solid #ccc;
+                font-family: "Jura", sans-serif;
+                font-size: 1rem;
+            }
 
-            padding: 4rem;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
+            .family-access-container button {
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 12px;
+                background: #20720c;
+                color: white;
+                font-weight: bold;
+                font-family: "Jura", sans-serif;
+                font-size: 1rem;
+                cursor: pointer;
+            }
 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            .family-access-container button:hover {
+                opacity: 0.95;
+            }
 
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
+            @media (max-width: 768px) {
+                .login-page {
+                    align-items: flex-end;
+                    padding: 0 1rem 2vh;
+                }
 
-        .login-container:hover {
-            transform: translateY(-3px);
-            transition: 0.3s ease;
-        }
+                .bg-kids {
+                    object-position: center 30%;
+                }
 
-        h2 {
-            text-align: center;
-            color: #0c3d72;
-        }
+                .family-access-container {
+                    max-width: 92%;
+                    padding: 2rem 1.25rem;
+                    border-radius: 22px;
+                }
 
-        .field {
-            margin-bottom: 1rem;
-            display: flex;
-            flex-direction: column;
-        }
+                .family-access-container h1 {
+                    font-size: 1.8rem;
+                }
+            }
 
-        input {
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-        }
+            @media (max-width: 480px) {
+                .bg-kids {
+                    object-position: center 26%;
+                }
 
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            background: #20720c;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+                .family-access-container {
+                    padding: 1.8rem 0.5rem;
+                }
 
-        .error {
-            color: red;
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
-</head>
+                .family-access-container h1 {
+                    font-size: 1.6rem;
+                }
+            }
+        </style>
+    </head>
 
-<body>
+    <body>
 
-    <div class="login-container">
-        <h2>Family Access</h2>
+        <div class="login-page">
+            <img src="images/trillis.jpg" alt="Family background" class="bg-kids">
 
-        <form id="loginForm">
+            <form id="loginForm" class="family-access-container">
+                <h1>Family Access</h1>
 
-            <div class="field">
-                <input type="text" id="username" placeholder="Name" required>
-            </div>
+                <input id="username" type="text" placeholder="Name" required>
+                <input id="password" type="password" placeholder="Password" required>
 
-            <div class="field">
-                <input type="password" id="password" placeholder="Password" required>
-            </div>
+                <button type="submit">Enter</button>
 
-            <button class="btn" type="submit">Enter</button>
+                <p id="errorMsg" class="error"></p>
+            </form>
+        </div>
 
-        </form>
-
-        <div class="error" id="errorMsg"></div>
-    </div>
-
-    <script src="js/login.js"></script>
-
-</body>
+        <script src="js/login.js"></script>
+    </body>
 
 </html>

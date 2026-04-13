@@ -10,7 +10,6 @@ if (!user) {
 }
 
 // 🔐 EMAIL JS CONFIG
-const reminderTimeOuts = new Map();
 
 if (window.emailjs) {
   window.emailjs.init({
@@ -30,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterToolbar = document.getElementById("filterPersonToolbar");
 
   let editingEventId = null;
+  let reminderTimeouts = new Map();
 
   const colors = {
     School: "#43a047",
@@ -185,38 +185,47 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (form.person.value === "Select") {
-      alert("Please select a person.");
-      return;
-    }
-
     const eventData = {
-      title: form.title.value,
+      title: form.title.value.trim(),
       person: form.person.value,
       start: form.start.value,
       end: form.end.value,
-      location: form.location.value,
+      location: form.location.value.trim(),
       reminder: form.reminder.value,
-      description: form.description.value,
-      allDay: form.allDay.checked,
-      reminderSentAt: null,
-
+      description: form.description.value.trim(),
+      allDay: form.allDay.checked
     };
 
-    // 👉 UPDATE
-    if (editingEventId) {
-      await updateDoc(doc(db, "events", editingEventId), eventData);
-      editingEventId = null;
-    } else {
-      await addDoc(collection(db, "events"), eventData);
+    if (!eventData.title || !eventData.start || !eventData.end) {
+      alert("Please complete title, start, and end.");
+      return;
     }
 
-    form.reset();
-    document.querySelector(".btn-primary").textContent = "Save Event";
+    if (!eventData.person || eventData.person === "Select") {
+      alert("Please choose a category/person.");
+      return;
+    }
 
-    loadEventsFromFirestore().catch(err => {
-      console.error("Firestore error:", err);
-    });
+    if (new Date(eventData.end) < new Date(eventData.start)) {
+      alert("End date cannot be earlier than start date.");
+      return;
+    }
+
+    try {
+      if (editingEventId) {
+        await updateDoc(doc(db, "events", editingEventId), eventData);
+        editingEventId = null;
+      } else {
+        await addDoc(collection(db, "events"), eventData);
+      }
+
+      form.reset();
+      document.querySelector(".btn-primary").textContent = "Save Event";
+      await loadEventsFromFirestore();
+    } catch (err) {
+      console.error("Error saving event:", err);
+      alert("The event could not be saved. Check the browser console.");
+    }
   });
 
   // ============================
@@ -342,6 +351,14 @@ document.addEventListener("DOMContentLoaded", () => {
     reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
     reminderTimeouts.clear();
   }
+
+  const timeoutId = setTimeout(() => {
+    new Notification("Reminder", {
+      body: event.title
+    });
+  }, delay);
+
+  reminderTimeouts.push(timeoutId);
 
   function getReminderDate(event) {
     if (!event.start) return null;

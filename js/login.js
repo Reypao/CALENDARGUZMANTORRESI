@@ -1,27 +1,33 @@
 const form = document.getElementById("loginForm");
 const errorMsg = document.getElementById("errorMsg");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
 
-// 👇 USUARIOS AUTORIZADOS
 const users = {
-    efrey: "8425",
-    paola: "trillis"
+  efrey: "8425",
+  paola: "trillis"
 };
 
-form.addEventListener("submit", (e) => {
+if (form && errorMsg && usernameInput && passwordInput) {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const username = document.getElementById("username").value.toLowerCase();
-    const password = document.getElementById("password").value;
+    const username = usernameInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
 
     if (users[username] && users[username] === password) {
-
-        // guardar sesión
-        localStorage.setItem("user", username);
-
-        // redirigir
-        window.location.href = "index.html";
-
+      localStorage.setItem("user", username);
+      window.location.href = "index.html";
     } else {
-        errorMsg.textContent = "Access denied";
+      errorMsg.textContent = "Access denied";
     }
-});
+  });
+
+  usernameInput.addEventListener("input", () => {
+    errorMsg.textContent = "";
+  });
+
+  passwordInput.addEventListener("input", () => {
+    errorMsg.textContent = "";
+  });
+}
