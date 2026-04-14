@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
       form.title.value = "";
       form.start.value = info.dateStr + "T09:00";
       form.end.value = info.dateStr + "T10:00";
-      form.person.value = "Select";
+      form.person.value = "";
       form.location.value = "";
       form.description.value = "";
       form.reminder.value = "0";
@@ -146,14 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderEventList();
     applyFilter();
     scheduleAllReminders();
-
-    // fallback si no hay eventos
-    if (calendar.getEvents().length === 0) {
-      calendar.addEvent({
-        title: "No events yet",
-        start: new Date()
-      });
-    }
   }
 
   // ============================
@@ -267,6 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       form.reset();
+      form.person.value = "";
+      form.reminder.value = "0";
+      form.allDay.checked = false;
       document.querySelector(".btn-primary").textContent = "Save Event";
       await loadEventsFromFirestore();
     } catch (err) {

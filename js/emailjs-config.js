@@ -1,6 +1,6 @@
 export const EMAILJS_CONFIG ={
-    PUBLIC_KEY:"agregar_key",
-    SERVICE_ID:"agregar_id",
-    TEMPLATE_ID:"agregar_template",
+    PUBLIC_KEY:"i6LntRa1AcwDE_FCw",
+    SERVICE_ID:"service_familia",
+    TEMPLATE_ID:"template_hozz6yb",
 };
-export const REMINDER_RECIPIENTS =["efrey5guzman@gmail.com"];
+export const REMINDER_RECIPIENTS =["efrey5guzman@gmail.com, paolaguzto@gmail.com"];
