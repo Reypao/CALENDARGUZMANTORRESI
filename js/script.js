@@ -160,16 +160,44 @@ document.addEventListener("DOMContentLoaded", () => {
   // RENDER LIST
   // ============================
   function renderEventList() {
-    const events = calendar.getEvents().sort((a, b) => {
-      return new Date(a.start) - new Date(b.start);
-    });
+    const now = new Date();
 
-    if (events.length === 0) {
-      eventList.innerHTML = "<p>No events saved yet.</p>";
-      return;
-    }
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
 
-    eventList.innerHTML = events.map(event => `
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+    const startOfDayAfterTomorrow = new Date(startOfToday);
+    startOfDayAfterTomorrow.setDate(startOfDayAfterTomorrow.getDate() + 2);
+
+    const events = calendar.getEvents();
+
+    const todayEvents = events
+      .filter(event => {
+        if (!event.start) return false;
+        const d = new Date(event.start);
+        return d >= startOfToday && d < startOfTomorrow;
+      })
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    const tomorrowEvents = events
+      .filter(event => {
+        if (!event.start) return false;
+        const d = new Date(event.start);
+        return d >= startOfTomorrow && d < startOfDayAfterTomorrow;
+      })
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    let html = "";
+
+    // 👉 TODAY
+    html += `<h3 style="margin-top:0;">Today</h3>`;
+
+    if (todayEvents.length === 0) {
+      html += `<p>No events today.</p>`;
+    } else {
+      html += todayEvents.map(event => `
       <div class="event-card">
         <h3>${event.title}</h3>
         <p><strong>Category:</strong> ${event.extendedProps.person || "-"}</p>
@@ -177,6 +205,25 @@ document.addEventListener("DOMContentLoaded", () => {
         <p><strong>End:</strong> ${formatDate(event.end)}</p>
       </div>
     `).join("");
+    }
+
+    // 👉 TOMORROW
+    html += `<h3 style="margin-top:1.5rem;">Tomorrow</h3>`;
+
+    if (tomorrowEvents.length === 0) {
+      html += `<p>No events tomorrow.</p>`;
+    } else {
+      html += tomorrowEvents.map(event => `
+      <div class="event-card">
+        <h3>${event.title}</h3>
+        <p><strong>Category:</strong> ${event.extendedProps.person || "-"}</p>
+        <p><strong>Start:</strong> ${formatDate(event.start)}</p>
+        <p><strong>End:</strong> ${formatDate(event.end)}</p>
+      </div>
+    `).join("");
+    }
+
+    eventList.innerHTML = html;
   }
 
   // ============================
