@@ -399,14 +399,6 @@ document.addEventListener("DOMContentLoaded", () => {
     reminderTimeouts.clear();
   }
 
-  const timeoutId = setTimeout(() => {
-    new Notification("Reminder", {
-      body: event.title
-    });
-  }, delay);
-
-  reminderTimeouts.push(timeoutId);
-
   function getReminderDate(event) {
     if (!event.start) return null;
 
